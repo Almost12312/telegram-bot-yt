@@ -10,7 +10,7 @@ type Storage interface {
 	Save(p *Page) error
 	PickRandom(userName string) error
 	Remove(p *Page) error
-	isExists(p *Page) (bool, error)
+	IsExists(p *Page) (bool, error)
 }
 
 type Page struct {
