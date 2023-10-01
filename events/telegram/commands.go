@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"bot/clients/telegram"
 	"bot/lib/errorH"
 	"bot/storage"
 	"log"
@@ -36,6 +37,7 @@ func (p *Processor) doCmd(text string, chatId int, username string) {
 
 func (p *Processor) savePage(pageUrl string, chatId int, username string) (err error) {
 	defer func() { err = errorH.WrapIfErr("cant save page", err) }()
+	send := NewSenderMsg(chatId, p.tg)
 
 	page := &storage.Page{
 		URL:      pageUrl,
@@ -48,7 +50,27 @@ func (p *Processor) savePage(pageUrl string, chatId int, username string) (err e
 	}
 
 	if isExists {
-		return p.tg.SendMessage(chatId)
+		return send(msgAlreadyExists)
+	}
+
+	if err := p.storage.Save(page); err != nil {
+		return err
+	}
+
+	if err := p.storage.Save(page); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p *Processor) SetRandom(chatId int, username string) (err error) {
+
+}
+
+func NewSenderMsg(chatId int, client *telegram.Client) func(msg string) error {
+	return func(msg string) error {
+		return client.SendMessage(chatId, msg)
 	}
 }
 
